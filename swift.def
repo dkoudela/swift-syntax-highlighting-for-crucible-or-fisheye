@@ -1,0 +1,126 @@
+
+syntaxdef swift {
+
+
+/\s+/m : ;
+
+
+/(a(bstract|s(|s(ert|ociat(edtype|ivity))))|b(oolean|reak|yte)\
+|c(a(se|tch)|har|lass|on(st|tinue|venience))\
+|d(e(init|fault)|id(Get|Set)|o(|uble)|ynamic(|Type))\
+|e(lse|xten(ds|sion)|num)\
+|f(al(lthrough|se)|i(leprivate|nal(|ly))|loat|or|unc)|g(et|oto|uard)\
+|i(f|mp(lements|ort)|n(|fix|it|out|stanceof|t(|er(face|nal)))|s)\
+|l(e(ft|t)|ong)|mutating|n(ative|ew|il|on(e|mutating)|ull)\
+|o(p(e(n|rator)|tional)|verride)\
+|p(ackage|ostfix|r(e(cedence|fix)|ivate|ot(ected|ocol))|ublic)\
+|r(e(peat|quired|turn)|ight)\
+|s(e(t|lf)|hort|t(atic|rictfp|ruct)|u(bscript|per)|witch|ynchronized)\
+|t(h(is|row(|s))|r(ansient|ue|y)|ype(|alias))\
+|unowned|v(ar|o(id|latile))\
+|w(eak|ill(Get|Set)|h(ere|ile)))\b/ : {
+      region {
+        type=keyword;
+        index=word;
+      }
+}
+
+/[\p{L}_\$][\p{L}\p{N}_\$]*/ : {
+      region {
+         type=identifier;
+         index=word;
+      }
+  }
+
+#annotation
+/@[\p{L}_\$][\p{L}\p{N}_\$]*/ : {
+      region {
+         type=annotation;
+         index=word;
+      }
+  }
+
+
+# string literals
+/"/ : {
+    context {
+            /\\"/: ;
+            /\\./: ;
+            /$/m : exit;
+            "\"" : exit;
+        }
+        region ${ALL} {
+               type=string;
+        }
+    }
+
+# char literal
+/'/ : {
+    context {
+            /\\./: ;
+            /$/m : exit;
+            "'" : exit;
+        }
+        region ${ALL} {
+               type=char_literal;
+        }
+    }
+
+
+/\/\/.*$/m : {
+      todo(${0});
+      region {
+         type=comment;
+             index=prose;
+             findlinks=true;
+      }
+   }
+
+
+/\/\*\*(.*?)\*\//s : {
+      javadoc(${1});
+      region {
+         type=comment;
+         index=prose;
+         findlinks=true;
+      }
+   }
+
+   context javadoc {
+
+      /(\B@[a-zA-Z0-9-_.]+)\s*([^@\*]*)/ : {
+         region ${1} {
+            type=commentmeta;
+             }
+      }
+   }
+
+/(0x[0-9a-f][0-9a-f_]*l?)|(0b[0-1][0-1_]*l?)|([0-9][0-9_]*(\.[0-9][0-9_]*)?|\.[0-9][0-9_]+)(e(\+|-)?[0-9][0-9_]*)?(f|l|d)?/i : {
+       region {
+          type=numeric;
+       }
+   }
+
+/\/\*(.*?)\*\//s : {
+      todo(${1});
+      region {
+         type=comment;
+         findlinks=true;
+      }
+      region ${1} {
+             index=prose;
+      }
+   }
+
+   context todo {
+      /(?i)todo\s.*/ : {
+        region {
+          type=todo;
+        }
+      }
+
+   }
+
+}
+
+
