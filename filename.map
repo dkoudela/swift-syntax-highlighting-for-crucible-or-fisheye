@@ -1,0 +1,3 @@
+# Custom syntax definition mappings
+"**/*.swift" swift.def "Swift"
+
